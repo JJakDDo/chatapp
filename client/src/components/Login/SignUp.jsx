@@ -62,7 +62,7 @@ function SignUp() {
             setUser({ ...data });
             if (data.status) {
               setError(data.status);
-            } else if (data.loggedin) {
+            } else if (data.loggedIn) {
               navigate("/home");
             }
           });
