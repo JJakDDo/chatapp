@@ -1,7 +1,11 @@
+require("dotenv").config();
+
 const express = require("express");
 const helmet = require("helmet");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const session = require("express-session");
+const mongoose = require("mongoose");
 
 const authRouter = require("./routers/authRouter");
 const app = express();
@@ -22,11 +26,35 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(
+  session({
+    secret: process.env.COOKIE_SECRET,
+    credentials: true,
+    name: "sid",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      //   secure: "false",
+      //   sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      expires: 1000 * 60 * 60 * 24,
+    },
+  })
+);
 
 app.use("/auth", authRouter);
 
 io.on("connect", (socket) => {});
 
-server.listen(4000, () => {
-  console.log("Server is listening on port 4000");
-});
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() =>
+    server.listen(4000, () => {
+      console.log("Server is listening on port 4000");
+    })
+  )
+  .catch((err) => console.error(err.message));

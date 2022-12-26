@@ -1,0 +1,12 @@
+{
+  "name": "@chatapp-clone/common",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "yup": "^0.32.11"
+  }
+}
