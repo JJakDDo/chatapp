@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const session = require("express-session");
 const mongoose = require("mongoose");
-const Redis = require("ioredis");
+const redisClient = require("./redis");
 const RedisStore = require("connect-redis")(session);
 
 const authRouter = require("./routers/authRouter");
@@ -19,8 +19,6 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-
-const redisClient = new Redis();
 
 app.use(helmet());
 app.use(
