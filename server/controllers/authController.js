@@ -1,5 +1,6 @@
 const Users = require("../models/users");
 const bcrypt = require("bcrypt");
+const { v4: uuidv4, v4 } = require("uuid");
 
 module.exports.handleLogin = async (req, res) => {
   if (req.session.user && req.session.user.username) {
@@ -21,7 +22,11 @@ module.exports.attemptLogin = async (req, res) => {
   const isSamePass = await bcrypt.compare(req.body.password, user.passhash);
 
   if (isSamePass) {
-    req.session.user = { username: user.username, id: user._id.toString() };
+    req.session.user = {
+      username: user.username,
+      id: user._id.toString(),
+      userId: user.userId,
+    };
     return res.json({ loggedIn: true, username: user.username });
   } else {
     return res.json({
@@ -41,8 +46,13 @@ module.exports.handleRegister = async (req, res) => {
   const newUser = new Users({
     username: req.body.username,
     passhash: hashedPass,
+    userId: v4(),
   });
   await newUser.save();
-  req.session.user = { username: newUser.username, id: newUser._id.toString() };
+  req.session.user = {
+    username: newUser.username,
+    id: newUser._id.toString(),
+    userId: newUser.userId,
+  };
   return res.json({ loggedIn: true, username: newUser.username });
 };

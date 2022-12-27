@@ -11,6 +11,11 @@ const usersSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  userId: {
+    type: String,
+    unique: true,
+    required: true,
+  },
 });
 
 const Users = mongoose.model("users", usersSchema);

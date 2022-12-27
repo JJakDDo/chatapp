@@ -12,6 +12,11 @@ const {
   wrap,
   corsConfig,
 } = require("./controllers/serverController");
+const {
+  authorizeUser,
+  initializeUser,
+  addFriend,
+} = require("./controllers/socketController");
 const app = express();
 
 const server = require("http").createServer(app);
@@ -27,8 +32,13 @@ app.use(sessionMiddleware);
 app.use("/auth", authRouter);
 
 io.use(wrap(sessionMiddleware));
+io.use(authorizeUser);
 io.on("connect", (socket) => {
-  console.log(socket.request.session.user.username);
+  initializeUser(socket);
+
+  socket.on("add_friend", (friendName, cb) =>
+    addFriend(socket, friendName, cb)
+  );
 });
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";

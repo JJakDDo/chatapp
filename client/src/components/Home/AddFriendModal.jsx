@@ -1,5 +1,6 @@
 import {
   Button,
+  Heading,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -9,12 +10,22 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react";
 import * as Yup from "yup";
-import { Form, Formik } from "formik";
+import { ErrorMessage, Form, Formik } from "formik";
 import TextField from "../TextField";
+import socket from "../../socket";
+import { useState, useCallback } from "react";
+import { useContext } from "react";
+import { FriendContext } from "./Home";
 
 function AddFriendModal({ isOpen, onClose }) {
+  const [error, setError] = useState("");
+  const { setFriendList } = useContext(FriendContext);
+  const closeModal = useCallback(() => {
+    setError("");
+    onClose();
+  }, [onClose]);
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal isOpen={isOpen} onClose={closeModal} isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Add a friend!</ModalHeader>
@@ -28,15 +39,29 @@ function AddFriendModal({ isOpen, onClose }) {
               .max(28, "Username is too long!"),
           })}
           onSubmit={(values, actions) => {
-            onClose();
+            socket.emit(
+              "add_friend",
+              values.friendName,
+              ({ errorMessage, done }) => {
+                if (done) {
+                  setFriendList((c) => [values.friendName, ...c]);
+                  closeModal();
+                  return;
+                }
+                setError(errorMessage);
+              }
+            );
           }}
         >
           <Form>
             <ModalBody>
+              <Heading as="p" color="red.500" textAlign="center" fontSize="lg">
+                {error}
+              </Heading>
               <TextField
                 label="Friend's name"
                 placeholder="Enter friend's username"
-                autocomplete="off"
+                autoComplete="off"
                 name="friendName"
               />
             </ModalBody>
