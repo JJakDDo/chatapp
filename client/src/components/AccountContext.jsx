@@ -22,6 +22,7 @@ const UserContext = ({ children }) => {
           setUser({ loggedIn: false });
           return;
         }
+        return res.json();
       })
       .then((data) => {
         if (!data) {

@@ -10,7 +10,7 @@ const useAuth = () => {
 const PrivateRoutes = () => {
   const isAuth = useAuth();
 
-  return isAuth ? <Outlet /> : <Outlet />;
+  return isAuth ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default PrivateRoutes;
