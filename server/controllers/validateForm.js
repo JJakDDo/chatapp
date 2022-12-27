@@ -11,14 +11,16 @@ const formSchema = Yup.object({
     .max(28, "Password is too long!"),
 });
 
-function validateForm(req, res) {
+function validateForm(req, res, next) {
   const formData = req.body;
   formSchema
     .validate(formData)
     .catch((err) => res.status(422).send(err.errors))
     .then((valid) => {
       if (valid) {
+        next();
       } else {
+        res.status(422).send();
       }
     });
 }
