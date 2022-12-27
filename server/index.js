@@ -4,54 +4,32 @@ const express = require("express");
 const helmet = require("helmet");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const session = require("express-session");
 const mongoose = require("mongoose");
-const redisClient = require("./redis");
-const RedisStore = require("connect-redis")(session);
 
 const authRouter = require("./routers/authRouter");
+const {
+  sessionMiddleware,
+  wrap,
+  corsConfig,
+} = require("./controllers/serverController");
 const app = express();
 
 const server = require("http").createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
-  },
+  cors: corsConfig,
 });
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(cors(corsConfig));
 app.use(express.json());
-app.use(
-  session({
-    secret: process.env.COOKIE_SECRET,
-    credentials: true,
-    name: "sid",
-    store: new RedisStore({
-      client: redisClient,
-    }),
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      //   secure: "false",
-      //   sameSite: "lax",
-      secure: process.env.NODE_ENV === "production" ? "true" : "auto",
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      expires: 1000 * 60 * 60 * 24,
-    },
-  })
-);
+app.use(sessionMiddleware);
 
 app.use("/auth", authRouter);
 
-io.on("connect", (socket) => {});
+io.use(wrap(sessionMiddleware));
+io.on("connect", (socket) => {
+  console.log(socket.request.session.user.username);
+});
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
 
