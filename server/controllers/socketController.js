@@ -44,7 +44,13 @@ module.exports.addFriend = async (socket, friendName, cb) => {
   );
 
   if (!friend) return cb({ done: false, errorMessage: "User does not exist!" });
-  if (currentFriendList && currentFriendList.indexOf(friendName) !== -1)
+  const parsedCurrentFriendList = currentFriendList.map(
+    (friend) => friend.split(".")[0]
+  );
+  if (
+    parsedCurrentFriendList &&
+    parsedCurrentFriendList.indexOf(friendName) !== -1
+  )
     return cb({ done: false, errorMessage: "Friend already added!" });
 
   await redisClient.lpush(
