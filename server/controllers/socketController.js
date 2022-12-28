@@ -30,6 +30,24 @@ module.exports.initializeUser = async (socket) => {
     socket.to(friendRooms).emit("connected", true, socket.user.username);
   }
   socket.emit("friends", parsedFriendList);
+
+  const msgQuery = await redisClient.lrange(
+    `chat:${socket.user.userId}`,
+    0,
+    -1
+  );
+  const messages = msgQuery.map((msgStr) => {
+    const parsedStr = msgStr.split(".");
+    return {
+      to: parsedStr[0],
+      from: parsedStr[1],
+      content: parsedStr[2],
+    };
+  });
+
+  if (messages && messages.length > 0) {
+    socket.emit("messages", messages);
+  }
 };
 
 module.exports.addFriend = async (socket, friendName, cb) => {
@@ -78,6 +96,16 @@ module.exports.onDisconnect = async (socket) => {
     friends.map((friend) => friend.userId)
   );
   socket.to(friendRooms).emit("connected", false, socket.user.username);
+};
+
+module.exports.dm = async (socket, message) => {
+  message.from = socket.user.userId;
+  const messageString = [message.to, message.from, message.content].join(".");
+
+  await redisClient.lpush(`chat:${message.to}`, messageString);
+  await redisClient.lpush(`chat:${message.from}`, messageString);
+
+  socket.to(message.to).emit("dm", message);
 };
 
 const parseFriendList = async (friendList) => {
