@@ -18,6 +18,7 @@ import AddFriendModal from "./AddFriendModal";
 function Sidebar() {
   const { friendList, setFriendList } = useContext(FriendContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  console.log(friendList);
   return (
     <>
       <VStack py="1.4rem">
@@ -37,7 +38,7 @@ function Sidebar() {
                   w="10px"
                   h="10px"
                 />
-                <Text>{friend}</Text>
+                <Text>{friend.username}</Text>
               </HStack>
             );
           })}

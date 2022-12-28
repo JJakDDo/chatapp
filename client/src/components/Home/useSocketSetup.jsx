@@ -13,6 +13,19 @@ function useSocketSetup(setFriendList) {
 
     socket.on("friends", (friendList) => setFriendList(friendList));
 
+    socket.on("connected", (status, username) => {
+      setFriendList((prevFriends) => {
+        const friends = [...prevFriends];
+        return friends.map((friend) => {
+          if (friend.username === username) {
+            friend.connected = status;
+          }
+
+          return friend;
+        });
+      });
+    });
+
     return () => {
       socket.off("connect_error");
     };

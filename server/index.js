@@ -16,7 +16,9 @@ const {
   authorizeUser,
   initializeUser,
   addFriend,
+  onDisconnect,
 } = require("./controllers/socketController");
+const { SocketAddress } = require("net");
 const app = express();
 
 const server = require("http").createServer(app);
@@ -39,6 +41,8 @@ io.on("connect", (socket) => {
   socket.on("add_friend", (friendName, cb) =>
     addFriend(socket, friendName, cb)
   );
+
+  socket.on("disconnecting", () => onDisconnect(socket));
 });
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
