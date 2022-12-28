@@ -7,6 +7,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 
 const authRouter = require("./routers/authRouter");
+const notiRouter = require("./routers/notiRouter");
 const {
   sessionMiddleware,
   wrap,
@@ -19,6 +20,7 @@ const {
   onDisconnect,
   dm,
 } = require("./controllers/socketController");
+const Redis = require("ioredis");
 const app = express();
 
 const server = require("http").createServer(app);
@@ -32,9 +34,20 @@ app.use(express.json());
 app.use(sessionMiddleware);
 
 app.use("/auth", authRouter);
+app.use("/notification", notiRouter);
 
 io.use(wrap(sessionMiddleware));
 io.use(authorizeUser);
+
+const subscriber = new Redis();
+
+subscriber.subscribe("chatapp:notification");
+
+subscriber.on("message", (channel, message) => {
+  console.log(message);
+  if (channel === "chatapp:notification") io.emit("notification", message);
+});
+
 io.on("connect", (socket) => {
   initializeUser(socket);
 

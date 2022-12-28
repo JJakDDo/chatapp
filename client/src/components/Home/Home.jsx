@@ -1,4 +1,4 @@
-import { Grid, GridItem, Tabs } from "@chakra-ui/react";
+import { Grid, GridItem, Tabs, useToast } from "@chakra-ui/react";
 import { createContext, useState } from "react";
 import Chat from "./Chat";
 import Sidebar from "./Sidebar";
@@ -11,8 +11,9 @@ function Home() {
   const [friendList, setFriendList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [friendIndex, setFriendIndex] = useState(0);
-  console.log(friendList);
-  useSocketSetup(setFriendList, setMessages);
+  const toast = useToast();
+
+  useSocketSetup(setFriendList, setMessages, toast);
   return (
     <FriendContext.Provider value={{ friendList, setFriendList }}>
       <Grid

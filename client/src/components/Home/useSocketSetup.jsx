@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import socket from "../../socket";
 import { AccountContext } from "../AccountContext";
 
-function useSocketSetup(setFriendList, setMessages) {
+function useSocketSetup(setFriendList, setMessages, toast) {
   const { setUser } = useContext(AccountContext);
   useEffect(() => {
     socket.connect();
@@ -15,6 +15,13 @@ function useSocketSetup(setFriendList, setMessages) {
     socket.on("messages", (messages) => setMessages(messages));
     socket.on("dm", (message) => {
       setMessages((prevMessage) => [message, ...prevMessage]);
+    });
+    socket.on("notification", (message) => {
+      toast({
+        position: "top",
+        title: message,
+      });
+      console.log(message);
     });
 
     socket.on("connected", (status, username) => {
@@ -36,8 +43,9 @@ function useSocketSetup(setFriendList, setMessages) {
       socket.off("friends");
       socket.off("messages");
       socket.off("dm");
+      socket.off("notification");
     };
-  }, [setUser, setFriendList, setMessages]);
+  }, [setUser, setFriendList, setMessages, toast]);
 }
 
 export default useSocketSetup;
